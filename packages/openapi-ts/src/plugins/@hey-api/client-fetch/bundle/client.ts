@@ -116,23 +116,28 @@ export const createClient = (config: Config = {}): Client => {
             : opts.parseAs) ?? 'json';
 
         if (response.status === 204 || response.headers.get('Content-Length') === '0') {
-          let emptyData: any;
-          switch (parseAs) {
-            case 'arrayBuffer':
-            case 'blob':
-            case 'text':
-              emptyData = await response[parseAs]();
-              break;
-            case 'formData':
-              emptyData = new FormData();
-              break;
-            case 'stream':
-              emptyData = response.body;
-              break;
-            case 'json':
-            default:
-              emptyData = {};
-              break;
+          let emptyData: any = undefined;
+          if (response.status !== 204) {
+            switch (parseAs) {
+              case 'arrayBuffer':
+              case 'blob':
+              case 'text':
+                emptyData = await response[parseAs]();
+                break;
+              case 'formData':
+                emptyData = new FormData();
+                break;
+              case 'stream':
+                emptyData = response.body;
+                break;
+              case 'json':
+              default:
+                emptyData = {};
+                break;
+            }
+          }
+          if (opts.responseValidator) {
+            await opts.responseValidator(emptyData);
           }
           return opts.responseStyle === 'data'
             ? emptyData
@@ -158,19 +163,15 @@ export const createClient = (config: Config = {}): Client => {
             break;
           }
           case 'stream':
-            return opts.responseStyle === 'data'
-              ? response.body
-              : {
-                  data: response.body,
-                  ...result,
-                };
+            data = response.body;
+            break;
+        }
+
+        if (opts.responseValidator) {
+          await opts.responseValidator(data);
         }
 
         if (parseAs === 'json') {
-          if (opts.responseValidator) {
-            await opts.responseValidator(data);
-          }
-
           if (opts.responseTransformer) {
             data = await opts.responseTransformer(data);
           }
