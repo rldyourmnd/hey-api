@@ -1099,6 +1099,14 @@ export type UserConfig = Plugin.Name<'zod'> &
           };
         };
     /**
+     * Reuse canonical schemas for unmodified request/response references.
+     * Operation-specific aliases are omitted; SDK validators retain the original
+     * schema. Explicit inferred/input/output types retain their named schemas.
+     *
+     * @default false
+     */
+    reuseSchemaReferences?: boolean;
+    /**
      * Configuration for TypeScript type generation from Zod schemas.
      *
      * Controls generation of TypeScript types based on the generated Zod schemas.
@@ -1367,6 +1375,8 @@ export type Config = Plugin.Name<'zod'> &
       };
     /** Configuration for response-specific Zod schemas. */
     responses: NamingOptions & FeatureToggle & TypeOptions;
+    /** Reuse canonical schemas for unmodified operation references. */
+    reuseSchemaReferences: boolean;
     /** Configuration for TypeScript type generation from Zod schemas. */
     types: {
       /** Configuration for `infer` types. */

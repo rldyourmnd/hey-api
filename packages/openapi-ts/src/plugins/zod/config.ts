@@ -271,6 +271,7 @@ export const defaultConfig: ZodPlugin['Config'] = {
         },
       },
     },
+    reuseSchemaReferences: false,
     types: {
       infer: {
         $coerceAny: ({ value }) => ({ enabled: Boolean(value) }),
