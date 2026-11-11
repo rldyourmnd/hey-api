@@ -13,58 +13,78 @@ const replaceCoreImports = (filePath: string) => {
   fs.writeFileSync(filePath, content, 'utf8');
 };
 
-export default defineConfig({
-  attw: {
-    ignoreRules: ['cjs-resolves-to-esm'],
-    profile: 'esm-only',
-  },
-  deps: {
-    neverBundle: [
-      '@angular/common/http',
-      '@angular/core',
-      'axios',
-      'ky',
-      'nuxt/app',
-      'ofetch',
-      'rxjs',
-      'vue',
-    ],
-  },
-  entry: ['./src/{index,internal,plugins,run}.ts'],
-  onSuccess: async () => {
-    // Copy client files to dist folder for runtime access
-    const pluginNames = [
-      'client-angular',
-      'client-axios',
-      'client-core',
-      'client-fetch',
-      'client-ky',
-      'client-next',
-      'client-nuxt',
-      'client-ofetch',
-    ];
+export default defineConfig([
+  {
+    attw: {
+      ignoreRules: ['cjs-resolves-to-esm'],
+      profile: 'esm-only',
+    },
+    deps: {
+      neverBundle: [
+        '@angular/common/http',
+        '@angular/core',
+        'axios',
+        'ky',
+        'nuxt/app',
+        'ofetch',
+        'rxjs',
+        'vue',
+      ],
+    },
+    entry: ['./src/{index,internal,plugins,run}.ts'],
+    onSuccess: async () => {
+      // Copy client files to dist folder for runtime access
+      const pluginNames = [
+        'client-angular',
+        'client-axios',
+        'client-core',
+        'client-fetch',
+        'client-ky',
+        'client-next',
+        'client-nuxt',
+        'client-ofetch',
+      ];
 
-    for (const pluginName of pluginNames) {
-      const srcPath = path.resolve(__dirname, 'src', 'plugins', '@hey-api', pluginName, 'bundle');
-      const destPath = path.resolve(
-        __dirname,
-        'dist',
-        'clients',
-        pluginName.slice('client-'.length),
-      );
+      for (const pluginName of pluginNames) {
+        const srcPath = path.resolve(__dirname, 'src', 'plugins', '@hey-api', pluginName, 'bundle');
+        const destPath = path.resolve(
+          __dirname,
+          'dist',
+          'clients',
+          pluginName.slice('client-'.length),
+        );
 
-      if (fs.existsSync(srcPath)) {
-        fs.mkdirSync(path.dirname(destPath), { recursive: true });
-        fs.cpSync(srcPath, destPath, { recursive: true });
+        if (fs.existsSync(srcPath)) {
+          fs.mkdirSync(path.dirname(destPath), { recursive: true });
+          fs.cpSync(srcPath, destPath, { recursive: true });
 
-        // replace core imports in client bundle
-        const clientFiles = fs.readdirSync(destPath);
-        for (const file of clientFiles) {
-          replaceCoreImports(path.resolve(destPath, file));
+          // replace core imports in client bundle
+          const clientFiles = fs.readdirSync(destPath);
+          for (const file of clientFiles) {
+            replaceCoreImports(path.resolve(destPath, file));
+          }
         }
       }
-    }
+    },
+    publint: true,
+    sourcemap: true,
   },
-  publint: true,
-  sourcemap: true,
-});
+  {
+    clean: false,
+    deps: {
+      neverBundle: [
+        '@angular/common/http',
+        '@angular/core',
+        'axios',
+        'ky',
+        'nuxt/app',
+        'ofetch',
+        'rxjs',
+        'vue',
+      ],
+    },
+    entry: ['./src/config.ts'],
+    outDir: 'dist/config',
+    sourcemap: true,
+  },
+]);

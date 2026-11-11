@@ -8,7 +8,9 @@ import { collectDeps } from '../normalize/value';
 import { deepMerge } from '../utils/object';
 import type { AnyPluginName, Plugin, PluginContext } from './types';
 
-export function definePluginConfig<T extends Plugin.Types>(pluginConfig: Plugin.Config<T>) {
+export function definePluginConfig<T extends Plugin.Types>(
+  pluginConfig: Plugin.Config<T>,
+): (userConfig?: Omit<T['config'], 'name'>) => Plugin.Config<T> {
   return (userConfig?: Omit<T['config'], 'name'>) => ({
     ...pluginConfig,
     config: { ...pluginConfig.config, ...(userConfig ?? {}) } as Plugin.Config<T>['config'],

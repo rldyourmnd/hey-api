@@ -1,101 +1,10 @@
 /* eslint-disable @typescript-eslint/no-namespace */
-// OVERRIDES
-// hard-coded here because build process doesn't pick up overrides from separate files
-import '@hey-api/codegen-core';
-import '@hey-api/shared';
+import './config';
 
-declare module '@hey-api/codegen-core' {
-  interface ProjectMeta {
-    /**
-     * If specified, this will be the file extension used when importing
-     * other modules. By default, we don't add a file extension and let the
-     * runtime resolve it.
-     *
-     * @default null
-     */
-    importFileExtension?: AnyString | null;
-  }
-
-  interface SymbolMeta {
-    artifact?:
-      | 'angular'
-      | 'arktype'
-      | 'fastify'
-      | 'json-schema'
-      | 'msw'
-      | 'sdk'
-      | 'typescript'
-      | 'valibot'
-      | 'zod'
-      | AnyString;
-    category?:
-      | 'client'
-      | 'external'
-      | 'hook'
-      | 'schema'
-      | 'sdk'
-      | 'transform'
-      | 'type'
-      | 'utility'
-      | AnyString;
-    /** Path to the resource this symbol represents. */
-    path?: ReadonlyArray<string | number>;
-    /** Name of the plugin that registered this symbol. */
-    plugin?: string;
-    resource?: 'client' | 'definition' | 'operation' | 'webhook' | AnyString;
-    resourceId?: string;
-    role?: 'data' | 'error' | 'errors' | 'options' | 'response' | 'responses' | AnyString;
-    /** Tags associated with this symbol. */
-    tags?: ReadonlyArray<string>;
-    variant?: 'container' | AnyString;
-  }
-}
-
-declare module '@hey-api/shared' {
-  interface PluginConfigMap {
-    '@angular/common': Plugins.AngularCommon.Types['Types'];
-    '@faker-js/faker': Plugins.FakerJsFaker.Types['Types'];
-    '@hey-api/client-angular': Plugins.HeyApiClientAngular.Types['Types'];
-    '@hey-api/client-axios': Plugins.HeyApiClientAxios.Types['Types'];
-    '@hey-api/client-fetch': Plugins.HeyApiClientFetch.Types['Types'];
-    '@hey-api/client-ky': Plugins.HeyApiClientKy.Types['Types'];
-    '@hey-api/client-next': Plugins.HeyApiClientNext.Types['Types'];
-    '@hey-api/client-nuxt': Plugins.HeyApiClientNuxt.Types['Types'];
-    '@hey-api/client-ofetch': Plugins.HeyApiClientOfetch.Types['Types'];
-    '@hey-api/examples': Plugins.HeyApiExamples.Types['Types'];
-    '@hey-api/schemas': Plugins.HeyApiSchemas.Types['Types'];
-    '@hey-api/sdk': Plugins.HeyApiSdk.Types['Types'];
-    '@hey-api/transformers': Plugins.HeyApiTransformers.Types['Types'];
-    '@hey-api/typescript': Plugins.HeyApiTypeScript.Types['Types'];
-    '@pinia/colada': Plugins.PiniaColada.Types['Types'];
-    '@tanstack/angular-query-experimental': Plugins.TanStackAngularQuery.Types['Types'];
-    '@tanstack/preact-query': Plugins.TanStackPreactQuery.Types['Types'];
-    '@tanstack/react-query': Plugins.TanStackReactQuery.Types['Types'];
-    '@tanstack/solid-query': Plugins.TanStackSolidQuery.Types['Types'];
-    '@tanstack/svelte-query': Plugins.TanStackSvelteQuery.Types['Types'];
-    '@tanstack/vue-query': Plugins.TanStackVueQuery.Types['Types'];
-    arktype: Plugins.Arktype.Types['Types'];
-    fastify: Plugins.Fastify.Types['Types'];
-    msw: Plugins.Msw.Types['Types'];
-    nestjs: Plugins.NestJs.Types['Types'];
-    orpc: Plugins.Orpc.Types['Types'];
-    swr: Plugins.Swr.Types['Types'];
-    valibot: Plugins.Valibot.Types['Types'];
-    zod: Plugins.Zod.Types['Types'];
-  }
-
-  interface PluginInstanceTypes {
-    Node: TsDsl;
-  }
-}
-// END OVERRIDES
-
-import type { AnyString, LazyOrAsync, MaybeArray } from '@hey-api/types';
 import colors from 'ansi-colors';
 // @ts-expect-error
 import colorSupport from 'color-support';
 
-import type { UserConfig } from './config/types';
 import type { AngularCommonPlugin } from './plugins/@angular/common';
 import type { FakerJsFakerPlugin, FakerJsFakerResolvers } from './plugins/@faker-js/faker';
 import type {
@@ -146,26 +55,11 @@ import type { OrpcPlugin } from './plugins/orpc';
 import type { SwrPlugin } from './plugins/swr';
 import type { ValibotPlugin, ValibotResolvers } from './plugins/valibot';
 import type { ZodPlugin, ZodResolvers } from './plugins/zod';
-import type { TsDsl } from './ts-dsl';
 
 colors.enabled = colorSupport().hasBasic;
 
+export { defineConfig, type UserConfig } from './config';
 export { createClient } from './generate';
-
-/**
- * Type helper for configuration object, returns {@link MaybeArray<UserConfig>} object(s)
- */
-export function defineConfig(
-  config: LazyOrAsync<ReadonlyArray<UserConfig>>,
-): Promise<ReadonlyArray<UserConfig>>;
-export function defineConfig(config: LazyOrAsync<UserConfig>): Promise<UserConfig>;
-export async function defineConfig<T extends MaybeArray<UserConfig>>(
-  config: LazyOrAsync<T>,
-): Promise<T> {
-  return typeof config === 'function' ? await config() : config;
-}
-
-export type { UserConfig } from './config/types';
 export * as plugins from './plugins';
 export { clientDefaultConfig, clientDefaultMeta } from './plugins/@hey-api/client-core/config';
 export { clientPluginHandler } from './plugins/@hey-api/client-core/plugin';

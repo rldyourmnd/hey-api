@@ -1,7 +1,7 @@
 {
   "name": "@hey-api/openapi-ts",
   "version": "0.99.0",
-  "description": "🌀 OpenAPI to TypeScript code generator. Production-grade SDKs, Zod schemas, TanStack Query hooks, and 20+ plugins. Used by Vercel, OpenCode, and PayPal.",
+  "description": "\ud83c\udf00 OpenAPI to TypeScript code generator. Production-grade SDKs, Zod schemas, TanStack Query hooks, and 20+ plugins. Used by Vercel, OpenCode, and PayPal.",
   "keywords": [
     "angular",
     "api-client",
@@ -78,7 +78,11 @@
       "types": "./dist/plugins.d.mts",
       "import": "./dist/plugins.mjs"
     },
-    "./package.json": "./package.json"
+    "./package.json": "./package.json",
+    "./config": {
+      "types": "./dist/config/config.d.mts",
+      "import": "./dist/config/config.mjs"
+    }
   },
   "scripts": {
     "build": "tsdown",
