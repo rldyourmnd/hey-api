@@ -14,11 +14,16 @@ describe('configuration entry point', () => {
     const filename = path.resolve(import.meta.dirname, 'config-entry.fixture.mts');
     const contents = `
       import { defineConfig } from '../../dist/config/config.mjs';
+      import { definePluginConfig, type Plugin } from '@hey-api/shared';
+      const customPlugin = definePluginConfig<Plugin.Types<{ name: string }>>({
+        config: {}, handler() {}, name: 'synthetic-custom-plugin',
+      });
       export default defineConfig({
         input: 'synthetic.json',
         output: { path: 'generated' },
         plugins: [
           '@hey-api/client-fetch',
+          customPlugin(),
           {
             name: 'zod',
             requests: true,

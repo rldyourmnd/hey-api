@@ -10,7 +10,7 @@ import type { AnyPluginName, Plugin, PluginContext } from './types';
 
 export function definePluginConfig<T extends Plugin.Types>(
   pluginConfig: Plugin.Config<T>,
-): (userConfig?: Omit<T['config'], 'name'>) => Plugin.Config<T> {
+): (userConfig?: Omit<T['config'], 'name'>) => Omit<Plugin.Config<T>, 'name'> & { name: any } {
   return (userConfig?: Omit<T['config'], 'name'>) => ({
     ...pluginConfig,
     config: { ...pluginConfig.config, ...(userConfig ?? {}) } as Plugin.Config<T>['config'],

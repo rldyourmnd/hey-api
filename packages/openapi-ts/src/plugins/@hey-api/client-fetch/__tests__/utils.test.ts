@@ -1,6 +1,6 @@
 import type { Auth } from '../../client-core/bundle/auth';
 import type { Client } from '../bundle/types';
-import { buildUrl, getParseAs, setAuthParams } from '../bundle/utils';
+import { buildUrl, getParseAs, mergeHeaders, setAuthParams } from '../bundle/utils';
 
 describe('buildUrl', () => {
   const scenarios: Array<{
@@ -279,5 +279,34 @@ describe('setAuthParams', () => {
     expect(headers.get('baz')).toBe('Bearer foo');
     expect(headers.get('fiz')).toBe('buz');
     expect(Object.keys(query).length).toBe(0);
+  });
+});
+
+describe('mergeHeaders', () => {
+  it('merges record, Headers, and tuple inputs in order', () => {
+    const headers = mergeHeaders(
+      { 'Content-Type': 'application/json', 'X-Probe': 'default' },
+      new Headers({ 'X-Probe': 'headers' }),
+      [
+        ['X-Probe', 'tuple'],
+        ['X-Extra', 'present'],
+      ],
+    );
+
+    expect(Object.fromEntries(headers)).toEqual({
+      'content-type': 'application/json',
+      'x-extra': 'present',
+      'x-probe': 'tuple',
+    });
+  });
+
+  it('retains record deletion and multi-value semantics', () => {
+    const headers = mergeHeaders(
+      { 'X-Remove': 'default' },
+      { 'X-Multi': ['one', 'two'], 'X-Remove': null },
+    );
+
+    expect(headers.has('X-Remove')).toBe(false);
+    expect(headers.get('X-Multi')).toBe('one, two');
   });
 });

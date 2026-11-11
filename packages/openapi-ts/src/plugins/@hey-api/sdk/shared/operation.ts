@@ -432,12 +432,21 @@ export function operationStatements({
         .prop(
           parameterContentType?.name ?? 'Content-Type',
           $.literal(operation.body.type === 'form-data' ? null : operation.body.mediaType),
-        )
-        .spread($('options').attr('headers').required(isRequiredOptions));
-      if (hasParams) {
-        headers.spread($('params').attr('headers'));
+        );
+      const optionHeaders = $('options').attr('headers').required(isRequiredOptions);
+      if (client.name === '@hey-api/client-fetch') {
+        const args = [headers, optionHeaders];
+        if (hasParams) {
+          args.push($('params').attr('headers'));
+        }
+        reqOptions.prop('headers', $(plugin.imports.mergeHeaders).call(...args));
+      } else {
+        headers.spread(optionHeaders);
+        if (hasParams) {
+          headers.spread($('params').attr('headers'));
+        }
+        reqOptions.prop('headers', headers);
       }
-      reqOptions.prop('headers', headers);
     }
   }
 

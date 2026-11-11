@@ -190,7 +190,12 @@ export const mergeHeaders = (
       continue;
     }
 
-    const iterator = header instanceof Headers ? headersEntries(header) : Object.entries(header);
+    const iterator =
+      header instanceof Headers
+        ? headersEntries(header)
+        : Array.isArray(header)
+          ? header
+          : Object.entries(header);
 
     for (const [key, value] of iterator) {
       if (value === null) {

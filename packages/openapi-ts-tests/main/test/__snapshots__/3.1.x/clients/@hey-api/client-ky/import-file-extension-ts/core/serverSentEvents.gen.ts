@@ -66,8 +66,8 @@ export type ServerSentEventsOptions<TData = unknown> = Omit<RequestInit, 'method
 
 export interface StreamEvent<TData = unknown> {
   data: TData;
-  event?: string;
-  id?: string;
+  event?: string | undefined;
+  id?: string | undefined;
   retry?: number;
 }
 
@@ -119,7 +119,7 @@ export function createSseClient<TData = unknown>({
         const requestInit: RequestInit = {
           redirect: 'follow',
           ...options,
-          body: options.serializedBody,
+          body: options.serializedBody ?? null,
           headers,
           signal,
         };
