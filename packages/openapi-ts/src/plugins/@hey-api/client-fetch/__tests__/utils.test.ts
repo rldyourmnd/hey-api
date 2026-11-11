@@ -1,6 +1,12 @@
 import type { Auth } from '../../client-core/bundle/auth';
 import type { Client } from '../bundle/types';
-import { buildUrl, getParseAs, mergeHeaders, setAuthParams } from '../bundle/utils';
+import {
+  buildUrl,
+  getParseAs,
+  mergeHeaders,
+  normalizeHeaders,
+  setAuthParams,
+} from '../bundle/utils';
 
 describe('buildUrl', () => {
   const scenarios: Array<{
@@ -308,5 +314,15 @@ describe('mergeHeaders', () => {
 
     expect(headers.has('X-Remove')).toBe(false);
     expect(headers.get('X-Multi')).toBe('one, two');
+  });
+});
+
+describe('normalizeHeaders', () => {
+  it('preserves record deletion markers until the final client merge', () => {
+    const normalized = normalizeHeaders({ 'X-Keep': undefined, 'X-Remove': null });
+    expect(normalized).toEqual({ 'X-Keep': undefined, 'X-Remove': null });
+    const result = mergeHeaders({ 'X-Keep': 'configured', 'X-Remove': 'configured' }, normalized);
+    expect(result.get('X-Keep')).toBe('configured');
+    expect(result.has('X-Remove')).toBe(false);
   });
 });

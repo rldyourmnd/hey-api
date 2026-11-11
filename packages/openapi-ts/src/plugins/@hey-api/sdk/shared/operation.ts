@@ -434,19 +434,15 @@ export function operationStatements({
           $.literal(operation.body.type === 'form-data' ? null : operation.body.mediaType),
         );
       const optionHeaders = $('options').attr('headers').required(isRequiredOptions);
-      if (client.name === '@hey-api/client-fetch') {
-        const args = [headers, optionHeaders];
-        if (hasParams) {
-          args.push($('params').attr('headers'));
-        }
-        reqOptions.prop('headers', $(plugin.imports.mergeHeaders).call(...args));
-      } else {
-        headers.spread(optionHeaders);
-        if (hasParams) {
-          headers.spread($('params').attr('headers'));
-        }
-        reqOptions.prop('headers', headers);
+      headers.spread(
+        client.name === '@hey-api/client-fetch'
+          ? $(plugin.imports.normalizeHeaders).call(optionHeaders)
+          : optionHeaders,
+      );
+      if (hasParams) {
+        headers.spread($('params').attr('headers'));
       }
+      reqOptions.prop('headers', headers);
     }
   }
 

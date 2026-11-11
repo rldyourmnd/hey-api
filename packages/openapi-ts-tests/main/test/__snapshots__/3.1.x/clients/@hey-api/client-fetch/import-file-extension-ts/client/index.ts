@@ -24,4 +24,4 @@ export type {
   ResponseStyle,
   TDataShape,
 } from './types.gen.ts';
-export { createConfig, mergeHeaders } from './utils.gen.ts';
+export { createConfig, mergeHeaders, normalizeHeaders } from './utils.gen.ts';

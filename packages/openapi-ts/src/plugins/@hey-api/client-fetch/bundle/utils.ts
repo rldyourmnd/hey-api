@@ -181,6 +181,17 @@ const headersEntries = (headers: Headers): Array<[string, string]> => {
   return entries;
 };
 
+/**
+ * Normalize HeadersInit without consuming record deletion markers before the
+ * final merge with client configuration headers.
+ */
+export const normalizeHeaders = (headers: Config['headers']): Record<string, unknown> =>
+  headers instanceof Headers
+    ? Object.fromEntries(headersEntries(headers))
+    : Array.isArray(headers)
+      ? Object.fromEntries(headers)
+      : (headers ?? {});
+
 export const mergeHeaders = (
   ...headers: Array<Required<Config>['headers'] | undefined>
 ): Headers => {
