@@ -12,7 +12,7 @@ export type ForMode = 'for' | 'in' | 'of';
 export type ForCondition = MaybeTsDsl<ts.Expression>;
 export type ForIterable = MaybeTsDsl<ts.Expression>;
 
-const Mixed = DoMixin(LayoutMixin(TsDsl<ts.ForStatement>));
+const Mixed = DoMixin(LayoutMixin(TsDsl<ts.ForStatement | ts.ForOfStatement | ts.ForInStatement>));
 
 class ImplForTsDsl<M extends ForMode = 'for'> extends Mixed {
   readonly '~dsl' = 'ForTsDsl';
@@ -107,7 +107,6 @@ class ImplForTsDsl<M extends ForMode = 'for'> extends Mixed {
     return this;
   }
 
-  // @ts-expect-error --- need to fix types ---
   override toAst(): M extends 'for'
     ? ts.ForStatement
     : M extends 'of'

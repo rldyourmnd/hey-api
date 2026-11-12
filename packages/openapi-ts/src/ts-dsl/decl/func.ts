@@ -3,7 +3,7 @@ import { isSymbol } from '@hey-api/codegen-core';
 
 import { ts } from '../../ts-compiler';
 import { TsDsl } from '../base';
-import { AsMixin } from '../mixins/as';
+import type { AsType } from '../expr/as';
 import { DecoratorMixin } from '../mixins/decorator';
 import { DoMixin } from '../mixins/do';
 import { DocMixin } from '../mixins/doc';
@@ -20,22 +20,27 @@ import { ParamMixin } from '../mixins/param';
 import { TypeParamsMixin } from '../mixins/type-params';
 import { TypeReturnsMixin } from '../mixins/type-returns';
 import { BlockTsDsl } from '../stmt/block';
+import { f } from '../utils/factories';
 import { safeRuntimeName } from '../utils/name';
 
 export type FuncMode = 'arrow' | 'decl' | 'expr';
 
 const Mixed = AbstractMixin(
-  AsMixin(
-    AsyncMixin(
-      DecoratorMixin(
-        DoMixin(
-          DocMixin(
-            ExportMixin(
-              ParamMixin(
-                PrivateMixin(
-                  ProtectedMixin(
-                    PublicMixin(
-                      StaticMixin(TypeParamsMixin(TypeReturnsMixin(TsDsl<ts.ArrowFunction>))),
+  AsyncMixin(
+    DecoratorMixin(
+      DoMixin(
+        DocMixin(
+          ExportMixin(
+            ParamMixin(
+              PrivateMixin(
+                ProtectedMixin(
+                  PublicMixin(
+                    StaticMixin(
+                      TypeParamsMixin(
+                        TypeReturnsMixin(
+                          TsDsl<ts.ArrowFunction | ts.FunctionDeclaration | ts.FunctionExpression>,
+                        ),
+                      ),
                     ),
                   ),
                 ),
@@ -92,6 +97,11 @@ class ImplFuncTsDsl<M extends FuncMode = 'arrow'> extends Mixed {
     return !this.missingRequiredCalls().length;
   }
 
+  /** Creates a type assertion for an arrow or function expression. */
+  as(this: FuncTsDsl<'arrow' | 'expr'>, type: AsType) {
+    return f.as(this, type);
+  }
+
   /** Switches the function to an arrow function form. */
   arrow(): FuncTsDsl<'arrow'> {
     this.mode = 'arrow';
@@ -110,7 +120,6 @@ class ImplFuncTsDsl<M extends FuncMode = 'arrow'> extends Mixed {
     return this as unknown as FuncTsDsl<'expr'>;
   }
 
-  // @ts-expect-error --- need to fix types ---
   override toAst(): M extends 'decl'
     ? ts.FunctionDeclaration
     : M extends 'expr'

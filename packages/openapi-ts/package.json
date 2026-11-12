@@ -73,6 +73,10 @@
       "types": "./dist/index.d.mts",
       "import": "./dist/index.mjs"
     },
+    "./config": {
+      "types": "./dist/config/config.d.mts",
+      "import": "./dist/config/config.mjs"
+    },
     "./internal": {
       "types": "./dist/internal.d.mts",
       "import": "./dist/internal.mjs"
