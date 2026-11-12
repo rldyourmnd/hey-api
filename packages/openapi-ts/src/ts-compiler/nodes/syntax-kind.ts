@@ -1,5 +1,5 @@
 // Token surface only (node discriminants use TsNodeKind); names mirror tsc's SyntaxKind.
-export enum SyntaxKind {
+enum TsSyntaxKind {
   AbstractKeyword = 'AbstractKeyword',
   AccessorKeyword = 'AccessorKeyword',
   AmpersandAmpersandToken = 'AmpersandAmpersandToken',
@@ -72,3 +72,5 @@ export enum SyntaxKind {
   UnknownKeyword = 'UnknownKeyword',
   VoidKeyword = 'VoidKeyword',
 }
+
+export { TsSyntaxKind as SyntaxKind };
