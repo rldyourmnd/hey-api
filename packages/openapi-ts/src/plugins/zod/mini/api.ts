@@ -12,6 +12,7 @@ import type {
 } from '../resolvers';
 import type { Chain } from '../shared/chain';
 import { exportAst } from '../shared/export';
+import { queryOperationSchema } from '../shared/references';
 import type { ValidatorArgs } from '../shared/types';
 import { getDefaultRequestValidatorLayers } from '../shared/validator';
 import type { ZodPlugin } from '../types';
@@ -55,7 +56,8 @@ function compositeNode(ctx: RequestValidatorResolverContext): Chain | undefined 
   for (const key of requestValidatorLayers) {
     const layer = resolveValidatorLayer(ctx.layers, key, defaultValues);
 
-    const layerSchema = ctx.plugin.querySymbol(
+    const layerSchema = queryOperationSchema(
+      ctx.plugin,
       ZodContracts.operationRequest(ctx.operation.id, key),
     );
     if (layerSchema) {
@@ -212,7 +214,7 @@ export function createResponseValidatorMini({
   operation,
   plugin,
 }: ValidatorArgs): ArrowFunc | undefined {
-  const symbol = plugin.querySymbol(ZodContracts.operationResponses(operation.id));
+  const symbol = queryOperationSchema(plugin, ZodContracts.operationResponses(operation.id));
   if (!symbol) return;
 
   const z = plugin.imports.z;

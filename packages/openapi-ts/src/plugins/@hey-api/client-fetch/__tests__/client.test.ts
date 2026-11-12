@@ -538,3 +538,88 @@ describe('error interceptor for fetch exceptions', () => {
     expect(result.error).toBe(abortError);
   });
 });
+
+describe('successful response validation', () => {
+  it.each([
+    {
+      name: 'an empty JSON response with a declared zero length',
+      response: () =>
+        new Response(null, {
+          headers: { 'Content-Length': '0', 'Content-Type': 'application/json' },
+        }),
+    },
+    {
+      name: 'an unexpected no-content response',
+      response: () => new Response(null, { status: 204 }),
+    },
+    {
+      name: 'a text response for an object contract',
+      response: () =>
+        new Response('not an object', {
+          headers: { 'Content-Type': 'text/plain' },
+        }),
+    },
+    {
+      name: 'a stream response for an object contract',
+      parseAs: 'stream' as const,
+      response: () => new Response('not an object'),
+    },
+  ])('rejects $name', async ({ parseAs, response }) => {
+    const client = createClient({ baseUrl: 'https://example.com' });
+    const validationError = new Error('required object response');
+    const validator = vi.fn().mockRejectedValue(validationError);
+    const result = await client.request({
+      fetch: vi.fn().mockResolvedValue(response()),
+      method: 'GET',
+      ...(parseAs ? { parseAs } : {}),
+      responseValidator: validator,
+      url: '/object',
+    });
+
+    expect(validator).toHaveBeenCalledTimes(1);
+    expect(result.error).toBe(validationError);
+  });
+
+  it('validates an intentional no-content response as undefined', async () => {
+    const client = createClient({ baseUrl: 'https://example.com' });
+    const validator = vi.fn(async (data: unknown) => {
+      if (data !== undefined) {
+        throw new Error('expected no content');
+      }
+    });
+    const result = await client.request({
+      fetch: vi.fn().mockResolvedValue(new Response(null, { status: 204 })),
+      method: 'DELETE',
+      responseValidator: validator,
+      url: '/object',
+    });
+
+    expect(validator).toHaveBeenCalledExactlyOnceWith(undefined);
+    expect(result.error).toBeUndefined();
+    expect(result.data).toBeUndefined();
+  });
+
+  it('validates before transforming a JSON response', async () => {
+    const client = createClient({ baseUrl: 'https://example.com' });
+    const calls: Array<string> = [];
+    const result = await client.request({
+      fetch: vi.fn().mockResolvedValue(
+        new Response('{"value":1}', {
+          headers: { 'Content-Type': 'application/json' },
+        }),
+      ),
+      method: 'GET',
+      responseTransformer: async (data) => {
+        calls.push('transform');
+        return { original: data, transformed: true };
+      },
+      responseValidator: async () => {
+        calls.push('validate');
+      },
+      url: '/object',
+    });
+
+    expect(calls).toEqual(['validate', 'transform']);
+    expect(result.data).toEqual({ original: { value: 1 }, transformed: true });
+  });
+});

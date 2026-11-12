@@ -5,6 +5,7 @@ import { $ } from '../../../ts-dsl';
 import { createSchemaComment } from '../../shared/utils/schema';
 import { identifiers } from '../constants';
 import type { ProcessorContext } from './processor';
+import { rememberOperationReference } from './references';
 import type { ZodFinal } from './types';
 
 export function exportAst({
@@ -20,6 +21,21 @@ export function exportAst({
   final: ZodFinal;
   meta?: Record<string, unknown>;
 }): Symbol {
+  // Only a bare reference is reusable. Nullable/default/lazy/metadata chains
+  // and explicitly requested type exports must retain their own declaration.
+  const reference = final.chain['~dsl'] === 'ExprTsDsl' ? final.chain.name.symbol : undefined;
+  if (
+    plugin.config.reuseSchemaReferences &&
+    reference &&
+    !final.typeName &&
+    !naming.types.infer.enabled &&
+    !naming.types.input.enabled &&
+    !naming.types.output.enabled &&
+    meta &&
+    rememberOperationReference(plugin, meta, reference)
+  )
+    return reference.canonical;
+
   const z = plugin.imports.z;
 
   const name = pathToName(path, { anchor: namingAnchor });
